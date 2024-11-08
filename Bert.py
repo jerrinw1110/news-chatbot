@@ -1,18 +1,8 @@
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 
-class SimilarityMetric:
-    model = None
+from bert_score import score
 
-    #Create model
-    def __init__(self):
-        self.model = SentenceTransformer('bert-base-nli-mean-tokens')
+def evaluate_with_bertscore(generated_summary, reference_summary):
+    P, R, F1 = score([generated_summary], [reference_summary], lang='en', verbose=True)
+    return {'precision': P.mean().item(), 'recall': R.mean().item(), 'f1': F1.mean().item()}
 
-    #Get similarity
-    def getSimilarity(self, sentence1, sentence2):
-        sentences = [sentence1, sentence2]
-        sentence_embeddings = self.model.encode(sentences)
 
-        similarityScore = cosine_similarity([sentence_embeddings[0], sentence_embeddings[1]])
-
-        return similarityScore[0][1]

@@ -5,8 +5,6 @@ import os
 import summaries
 import Bert
 
-#Initialize the similarity metric
-SM = Bert.SimilarityMetric()
 
 
 #TODO: Make this recursively find all data 
@@ -49,11 +47,12 @@ Bias = []
 PredictedBiasThenSummaries = []
 
 #Call ChatGPT to summarize
-AIsummaries.append(summaries.summarize((contentList[0]), len(summaryList[0].split(" "))))
+for i in range(3):
+    AIsummaries.append(summaries.summarize((contentList[i]), len(summaryList[i].split(" "))))
 
-Bias.append(summaries.bias(contentList[0]))
+    Bias.append(summaries.bias(contentList[i]))
 
-PredictedBiasThenSummaries.append(summaries.summarizeANDBias(contentList[0], len(summaryList[0].split(" "))))
+    PredictedBiasThenSummaries.append(summaries.summarizeANDBias(contentList[i], len(summaryList[i].split(" "))))
 
 #Write to files
 
@@ -67,16 +66,29 @@ for i,suma in enumerate(Bias):
         file.write(suma)
         file.close()
 
-for i,suma in enumerate(Bias):
+for i,suma in enumerate(PredictedBiasThenSummaries):
     with open("GeneratedSummaries" + os.sep + "BiasThenSummary" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
         file.write(suma)
         file.close()
 
 
-print("The similarity between the generated summary and the provided summary is: ")
-print(SM.getSimilarity(summaryList[0], AIsummaries[0]))
+
+for i,suma in enumerate(AIsummaries):
+    with open("GeneratedSummaries" + os.sep + "BertscoreForSummaries" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
+        
+        scoredict = Bert.evaluate_with_bertscore(suma, summaryList[i])
+        
+        file.write(str(scoredict))
+        file.close()
 
 
+for i,suma in enumerate(PredictedBiasThenSummaries):
+    with open("GeneratedSummaries" + os.sep + "BertScoreForBiasThenSummary" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
+        
+        scoredict = Bert.evaluate_with_bertscore(suma, summaryList[i])
+        
+        file.write(str(scoredict))
+        file.close()
 
 """
 TODO:
@@ -85,6 +97,8 @@ TODO:
 
 -Possible Comparison methods: BERT, rouge, some from class
 
+-Set up scripting to to seperate comparison and summary generation
+-Set up arguments for number of summaries to generate and whether to calculate similarity
 
 
 """

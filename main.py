@@ -22,6 +22,12 @@ onlyfiles = [f for f in listdir(directoryToSummarize) if isfile(join(directoryTo
 #A list of the files in the 'label' directory
 onlySummaries = [f for f in listdir(directoryOfSummaries) if isfile(join(directoryOfSummaries, f))]
 
+onlyfiles = sorted(onlyfiles, key=os.path.basename)
+
+onlySummaries = sorted(onlySummaries, key=os.path.basename)
+
+
+
 #Stores the data content in a list
 contentList = []
 

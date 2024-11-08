@@ -1,6 +1,2 @@
-**Classification: Center**
-
-- The article presents an event involving Prime Minister Tony Blair that highlights his education policies without overtly advocating for or against any political party.
-- Quotes from opposition parties (Conservatives and Lib Dems) are included, providing a balanced view of differing opinions on Blair’s pledges.
-- The tone remains neutral, focusing on factual reporting regarding the education policy discussion and the sailing event rather than engaging in partisan rhetoric.
-- Overall, it does not display a strong alignment with either left or right ideologies, making it center-leaning.
+- **Classification**: Left
+- **Reasoning**: The article focuses on public accountability and the importance of transparency regarding government actions. It highlights the concerns of an information commissioner and political figures from left-leaning parties (Lib Dems) regarding potential misconduct by the government. The condemnatory tone towards the deletion of emails suggests a stance that promotes governmental accountability, aligning more with leftist values that emphasize civil rights and the public’s right to information.

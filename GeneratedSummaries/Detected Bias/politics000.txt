@@ -1,5 +1,5 @@
-- **Classification: Left**
-- The article discusses a Labour government's proposal to increase maternity pay, highlighting social welfare benefits which align with left-leaning ideologies. 
-- The focus on extending maternity pay and introducing new rights for families reflects progressive values.
-- The positive framing of government initiatives and criticism of opposition responses suggests favorable bias towards Labour, which is consistent with leftist perspectives on social policy.
-- The inclusion of critiques from opposition parties appears balanced, yet the overall tone supports Labour's approach, reinforcing the left classification.
+*CLASSIFICATION: left*
+
+- The article promotes proposals for increased maternity pay and parental rights, which are generally associated with left-leaning policies that focus on social welfare.
+- The language used by government officials, particularly the emphasis on benefits for new mothers and their families, aligns with progressive values.
+- The criticisms from opposition parties do not detract from the overall support for increased maternity benefits, which underscores a pro-social welfare stance typical of leftist media bias.

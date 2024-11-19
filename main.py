@@ -2,14 +2,35 @@ from openai import OpenAI
 from os import listdir
 from os.path import isfile, join
 import os
+
+import sklearn.feature_extraction
 import summaries
 import Bert
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Preprocess texts for IC
+def preprocess(text):
+    # Basic text cleaning: convert to lowercase, remove punctuation, etc.
+    import re
+    text = text.lower()
+    text = re.sub(r'\W+', ' ', text)
+    return text
 
 
+"""
+#Needed parameters
+number of summaries to make
+summary, bias, bias then summary, or all three
+2-way comparison, three way comparison
+
+
+"""
 #TODO: Make this recursively find all data 
 
 topic = "politics"
+n=10
 
 #Path to our data
 directoryToSummarize = join("BBC News Summary","News Articles", topic)
@@ -50,15 +71,14 @@ AIsummaries = []
 #Predicted Bias List
 Bias = []
 
-PredictedBiasThenSummaries = []
 
 #Call ChatGPT to summarize
-for i in range(3):
+for i in range(n):
     AIsummaries.append(summaries.summarize((contentList[i]), len(summaryList[i].split(" "))))
 
     Bias.append(summaries.bias(contentList[i]))
 
-    PredictedBiasThenSummaries.append(summaries.summarizeANDBias(contentList[i], len(summaryList[i].split(" "))))
+
 
 #Write to files
 
@@ -72,10 +92,7 @@ for i,suma in enumerate(Bias):
         file.write(suma)
         file.close()
 
-for i,suma in enumerate(PredictedBiasThenSummaries):
-    with open("GeneratedSummaries" + os.sep + "BiasThenSummary" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
-        file.write(suma)
-        file.close()
+
 
 
 
@@ -88,13 +105,36 @@ for i,suma in enumerate(AIsummaries):
         file.close()
 
 
-for i,suma in enumerate(PredictedBiasThenSummaries):
-    with open("GeneratedSummaries" + os.sep + "BertScoreForBiasThenSummary" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
-        
-        scoredict = Bert.evaluate_with_bertscore(suma, summaryList[i])
-        
-        file.write(str(scoredict))
-        file.close()
+for i,suma in enumerate(AIsummaries):
+    vectorizer = TfidfVectorizer()
+    
+    #Calculate IC of gen summary
+    article = preprocess(contentList[i])
+    aiSummary = preprocess(suma)
+
+    tfIDFMatrix = vectorizer.fit_transform([article, aiSummary])
+
+    similarity = cosine_similarity(tfIDFMatrix[0:1], tfIDFMatrix[1:2])
+
+    coverage_score = similarity[0][0]
+
+    print("The IC of the ai summary is: " + str(coverage_score))
+
+    #Calculate IC of human summary
+    humanSummary = preprocess(summaryList[i])
+    tfIDFMatrix = vectorizer.fit_transform([article, humanSummary])
+    
+    similarity = cosine_similarity(tfIDFMatrix[0:1], tfIDFMatrix[1:2])
+
+    coverage_score = similarity[0][0]
+
+    
+    print("The IC of the human summary is: " + str(coverage_score))
+
+
+
+
+
 
 """
 TODO:

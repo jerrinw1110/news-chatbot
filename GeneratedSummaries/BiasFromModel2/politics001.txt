@@ -1,0 +1,7 @@
+CLASSIFICATION: center
+
+- The article presents facts without obvious bias or partisan language
+- It covers a government issue involving email deletion and questions from both the Tory and Lib Dem parties
+- The information commissioner is quoted condemning the deletion of emails to prevent their disclosure under freedom of information laws
+- Both sides are given a platform to express their concerns and viewpoints
+- The article focuses on the impact of the new rules on e-mail retention in light of the Freedom of Information Act

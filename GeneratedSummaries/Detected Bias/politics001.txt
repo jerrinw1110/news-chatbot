@@ -1,2 +1,5 @@
-- **Classification**: Left
-- **Reasoning**: The article focuses on public accountability and the importance of transparency regarding government actions. It highlights the concerns of an information commissioner and political figures from left-leaning parties (Lib Dems) regarding potential misconduct by the government. The condemnatory tone towards the deletion of emails suggests a stance that promotes governmental accountability, aligning more with leftist values that emphasize civil rights and the public’s right to information.
+*CLASSIFICATION: center*
+
+- The article reports on a government-related issue surrounding email deletions and their implications for transparency, presenting statements from various political figures without overtly favoring any side.
+- It includes criticism from both major opposition parties (Tories and Lib Dems) regarding the government’s actions, suggesting a balanced perspective.
+- The content reflects a focus on accountability and public access to information, which aligns more with a neutral stance rather than a partisan one.

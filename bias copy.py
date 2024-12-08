@@ -38,7 +38,7 @@ def get_response_from_model_2(messages):
 def bias(quotes):
 
     instructions = f"""
-    Here is a news article, try to classify the article based on media bias into one of 5 discrete classess: "far-left", "left", "center", "right", "far-right". 
+    Here is a summary of a news article, try to classify the article based on media bias into one of 5 discrete classess: "far-left", "left", "center", "right", "far-right". 
     Start this classification with the tag *CLASSIFICATION:*
     Give an explanation for this classification in under 100 words. Please use bullet-points for this explanation.
 
@@ -48,8 +48,7 @@ def bias(quotes):
     message = format_message("system", instructions) # system means high priority 
     messages = [message] # ChatGPT API expects any message to be in a list
     response = get_response_from_model_1(messages)
-    response2 = get_response_from_model_2(messages)
-    return response, response2
+    return response
 
 # Preprocess texts for IC
 def preprocess(text):
@@ -72,12 +71,15 @@ client = OpenAI(api_key = key)
 
 
 topic = "politics"
-n=1
+n=10
 
 #Path to our data
 directoryToSummarize = join("BBC News Summary","News Articles", topic)
 #Path to our 'label'
 directoryOfSummaries = join("BBC News Summary", "Summaries", topic)
+
+directoryOfAISummaries = join("GeneratedSummaries","Summaries")
+
 
 #A list of the files in the data directory
 onlyfiles = [f for f in listdir(directoryToSummarize) if isfile(join(directoryToSummarize, f))]
@@ -85,67 +87,30 @@ onlyfiles = [f for f in listdir(directoryToSummarize) if isfile(join(directoryTo
 #A list of the files in the 'label' directory
 onlySummaries = [f for f in listdir(directoryOfSummaries) if isfile(join(directoryOfSummaries, f))]
 
+
+onlyAISummaries = [f for f in listdir(directoryOfAISummaries) if isfile(join(directoryOfAISummaries, f))]
+
 onlyfiles = sorted(onlyfiles, key=os.path.basename)
 
 onlySummaries = sorted(onlySummaries, key=os.path.basename)
 
+onlyAISummaries = sorted(onlyAISummaries, key=os.path.basename)
 
 
 #Stores the data content in a list
 contentList = []
-Bias = []
-
+BiasOfSummaries = []
 
 #Read in our content
-for filePath in onlyfiles:
-    with open(join(directoryToSummarize,filePath), 'r') as file:
+for filePath in onlyAISummaries:
+    with open(join(directoryOfAISummaries,filePath), 'r') as file:
         contentList.append(file.read())
 
 for i in range(n):
-    response1,response2 = bias(contentList[i])
-    Bias.append([response1,response2])
+    BiasOfSummaries.append(bias(contentList[i]))
 
-for i,suma in enumerate(Bias):
-    with open("GeneratedSummaries" + os.sep + "BiasFromModel1" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
-        file.write(suma[0])
+
+for i,suma in enumerate(BiasOfSummaries):
+    with open("GeneratedSummaries" + os.sep + "BiasOfSummaries" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
+        file.write(suma)
         file.close()
-    with open("GeneratedSummaries" + os.sep + "BiasFromModel2" + os.sep  + topic + "{:0>3}.txt".format(i), 'w') as file:
-        file.write(suma[1])
-        file.close()
-
-for b in Bias:
-    bias1 = b[0]
-    bias2 = b[1]
-
-    bias1 = "\n".join(bias1.split("\n")[1:])
-    bias2 = "\n".join(bias2.split("\n")[1:])
-    
-
-    vectorizer = TfidfVectorizer()
-    
-    #Calculate IC of gen summary
-    bias1 = preprocess(bias1)
-    bias2 = preprocess(bias2)
-
-    tfIDFMatrix = vectorizer.fit_transform([bias1, bias2])
-
-    similarity = cosine_similarity(tfIDFMatrix[0:1], tfIDFMatrix[1:2])
-
-    coverage_score = similarity[0][0]
-
-    print("The similarity of the two bias scores is: " + str(coverage_score))
-
-    # Example TF-IDF scores for terms
-    vocab = vectorizer.vocabulary_
-
-
-    # Create a word cloud
-    wordcloud = WordCloud(width=800, height=400, background_color='white', colormap="plasma").generate_from_frequencies(vocab)
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('TF-IDF Word Cloud')
-    plt.savefig("Word Cloud.png")
-
-
-

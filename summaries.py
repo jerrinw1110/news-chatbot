@@ -36,9 +36,10 @@ def summarize(quotes, length):
 def bias(quotes):
 
     instructions = f"""
-    Here is a news article, try to classify the article based on media bias into one of 5 discrete classess: "far-left", "left", "center", "right", "far-right". 
-    Start this classification with the tag *CLASSIFICATION:*
-    Give an explanation for this classification in under 100 words. Please use bullet-points for this explanation.
+    Here is a news article, try to classify the article based on media bias into one of 5 discrete classess: "Left", "Lean Left", "Center", "Lean Right", "Right". 
+    Put this classification on the first line with no added parts.
+    Give an explanation on a new line for this classification in under 100 words and do not use new line characters in the explanation.
+    
 
     Quotes: {quotes}
     """

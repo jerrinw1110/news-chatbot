@@ -10,7 +10,8 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-
+#For Case 2
+import seaborn as sns
 
 
 
@@ -125,7 +126,67 @@ def draw_bar_chart(bias_classes, ai_count, human_count):
 
     return
 
+#Runs TF-IDF on the 5 classes of explanations (left, lean left, etc) then generates a heat map of key words
+def generate_heat_maps(explanationsByBias):
+    print(explanationsByBias)
+    for i,explanationList in enumerate(explanationsByBias):
+        if len(explanationList) > 1:
+            vectorizer = TfidfVectorizer()
+            data = {"explanation": explanationList}
+            df = pd.DataFrame(data)
+            df['explanation'] = df['explanation'].apply(preprocess)
+            tfidf_matrix = vectorizer.fit_transform(df["explanation"])
+            tfidf_df = pd.DataFrame(tfidf_matrix.toarray(), columns=vectorizer.get_feature_names_out())
 
+            print(tfidf_df)
+
+            plt.figure(figsize=(150,40))
+            sns.heatmap(tfidf_df, annot=True, cmap='coolwarm', linewidths=.5)
+            plt.title("TF-IDF Heatmap")
+            plt.savefig(f"test{i}.png")
+        else:
+            print(f"Cases.py: Class {i} is insufficient to build a heatmap.")
+
+
+
+
+    return
+
+
+def draw_bar_chart_Case_3(bias_classes, ai_count, human_count, summary_count):
+
+
+    # set width of bar 
+    barWidth = 0.25
+    fig = plt.subplots(figsize =(12, 8)) 
+
+ 
+    # Set position of bar on X axis 
+    br1 = np.arange(5) 
+    br2 = [x + barWidth for x in br1] 
+    br3 = [x + barWidth for x in br2] 
+
+
+    # Make the plot
+    plt.bar(br1, ai_count, color ='r', width = barWidth, 
+            edgecolor ='grey', label ='AI') 
+    plt.bar(br2, human_count, color ='b', width = barWidth, 
+            edgecolor ='grey', label ='HUMAN') 
+    plt.bar(br3, summary_count, color ='g', width = barWidth, 
+            edgecolor ='grey', label ='SUM') 
+
+
+    # Adding Xticks 
+    plt.xlabel('Bias', fontweight ='bold', fontsize = 15) 
+    plt.ylabel('Number of Detections', fontweight ='bold', fontsize = 15) 
+    plt.xticks([r + barWidth for r in range(5)], 
+            bias_classes)
+
+    plt.legend()
+    plt.savefig("Case3BarChart.png")
+
+
+    return
 
 
 #Claim 1: ChatGPT 4.0 is able to summarize an news article equivalently to a human being and can provide equal or higher information coverage compared to human work.
@@ -228,6 +289,8 @@ Whats Needed:
 -100 articles
 -Bias detect via ChatGPT 4o-mini
 -Bar graph via matplot lib ***** NEW DEPENDANCY
+-TF-IDF on each bias group, making 5 heat maps
+
 """
 def Case2():
     #Pull in our data, which is randomized
@@ -256,11 +319,30 @@ def Case2():
     articleClassification = Articles_df["bias"].to_list()
     bias_classes = ["Left", "Lean Left", "Center", "Lean Right", "Right"]
 
+    #Number of classifications of each type
     human_classification_count = np.array([articleClassification.count(bias_classes[i]) for i in range(5)])
     ai_classification_count = np.array([articleClassificationByAI.count(bias_classes[i]) for i in range(5)])
     
 
     draw_bar_chart(bias_classes, ai_classification_count, human_classification_count)
+
+
+    #Time to run tf-idf on each bias group
+    #We need to divide up the explanations based on bias class
+    #NOTE: This is slow, and probably can be merged into the formatting process above
+    explanationByClassification = [[], [], [], [], []]
+    bias_dict = {"Left": 0, "Lean Left": 1, "Center": 2, "Lean Right": 3, "Right":4}
+
+
+    for i,classification in enumerate(articleClassificationByAI):
+        bias = bias_dict[classification]
+        explanationByClassification[bias].append(explanationOfClassification[i])
+
+    #Run tf-idf on each explanation in a group
+    
+    generate_heat_maps(explanationByClassification)
+
+
 
     #Time to save csv
     #This might need to be updated to use the formatted data
@@ -278,9 +360,78 @@ Whats Needed:
 -100 ai summaries
 -Detect Bias in all 200
 -Save only the Bias leaning
--Bar graph, seperating ai bias and article bias
+-Bar graph, of article bias, 'true' bias, and summary bias
+-Deviation? Basically
 """
 def Case3():
+    #Pull in our data, which is randomized
+    Articles_df = pull_articles(diverse_Flag=True)
+    titles = Articles_df["title"].to_list()
+    body = Articles_df["body"].to_list()
+
+    #Format title and body into one string.
+    articles = []
+    for i in range(len(titles)):
+        articles.append("Article Title: " + titles[i] + "\nBody: " + body[i])
+
+    #Ping Chat GPT for its bias classification
+    raw_ai_bias = []
+    for article in articles:
+        raw_ai_bias.append(summaries.bias(article))
+
+    ai_summary = []
+    for article in articles:
+        ai_summary.append(summaries.summarize(article, len(article)))
+
+    raw_ai_bias_on_summary = []
+    for summary in ai_summary:
+        raw_ai_bias_on_summary.append(summaries.bias(summary))
+
+
+    #Now we want to create a bar graph
+    articleClassificationByAI = []
+    explanationOfClassification = []
+    summaryClassificationByAI = []
+    explanationOfSummaryClassification = []
+
+
+    for bias, summary_bias in zip(raw_ai_bias, raw_ai_bias_on_summary):
+        biasList = bias.split("\n")
+        articleClassificationByAI.append(biasList[0].strip())
+        explanationOfClassification.append(biasList[1])
+        summaryBiasList = summary_bias.split("\n")
+        summaryClassificationByAI.append(summaryBiasList[0].strip())
+        explanationOfSummaryClassification.append(summaryBiasList[1])
+
+
+    articleClassification = Articles_df["bias"].to_list()
+    bias_classes = ["Left", "Lean Left", "Center", "Lean Right", "Right"]
+
+    human_classification_count = np.array([articleClassification.count(bias_classes[i]) for i in range(5)])
+    ai_classification_count = np.array([articleClassificationByAI.count(bias_classes[i]) for i in range(5)])
+    ai_summary_classifciation_count = np.array([summaryClassificationByAI.count(bias_classes[i]) for i in range(5)])
+
+
+
+    draw_bar_chart_Case_3(bias_classes, ai_classification_count, human_classification_count, ai_summary_classifciation_count)
+
+
+
+
+
+    #Time to save csv
+    #This might need to be updated to use the formatted data
+    Articles_df["Raw AI Bias Detection"] = raw_ai_bias
+    Articles_df["AI Bias Classification"] = articleClassificationByAI
+    Articles_df["AI Classification Explanation"] = explanationOfClassification
+    Articles_df["AI Summary"] = ai_summary
+    Articles_df["Raw AI Summary Bias Detection"] = raw_ai_bias_on_summary
+    Articles_df["AI Summary Bias Classification"] = summaryClassificationByAI
+    Articles_df["AI Summary Classification Explanation"] = explanationOfSummaryClassification
+
+    Articles_df.to_csv("Case_3.csv")
+
+
 
 
     return
